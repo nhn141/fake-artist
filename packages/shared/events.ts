@@ -1,0 +1,16 @@
+export enum ClientEvents {
+  JOIN_ROOM = 'JOIN_ROOM',
+  START_GAME = 'START_GAME',
+  DRAW_STROKE = 'DRAW_STROKE',
+  UNDO_STROKE = 'UNDO_STROKE',
+  END_TURN = 'END_TURN', // Optional if auto-ended
+  VOTE_FAKE_ARTIST = 'VOTE_FAKE_ARTIST',
+  GUESS_WORD = 'GUESS_WORD',
+  PLAY_AGAIN = 'PLAY_AGAIN',
+}
+
+export enum ServerEvents {
+  ROOM_STATE_UPDATE = 'ROOM_STATE_UPDATE',
+  ROLE_ASSIGNMENT = 'ROLE_ASSIGNMENT',
+  ERROR = 'ERROR',
+}
