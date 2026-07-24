@@ -3,7 +3,7 @@ import { useGame } from '../context/GameContext';
 import { sounds } from '../lib/sounds';
 
 export const GuessingView = () => {
-  const { roomState, guess, role } = useGame();
+  const { roomState, guessWord: submitGuess, role } = useGame();
   const [guessWord, setGuessWord] = useState('');
   const [hasGuessed, setHasGuessed] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,7 +42,7 @@ export const GuessingView = () => {
     e.preventDefault();
     if (guessWord.trim()) {
       sounds.playSubmit();
-      guess(guessWord.trim());
+      submitGuess(guessWord.trim());
       setHasGuessed(true);
     }
   };

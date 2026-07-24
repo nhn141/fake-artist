@@ -4,6 +4,7 @@ export interface Player {
     color: string;
     isHost: boolean;
     isConnected: boolean;
+    isFakeArtist?: boolean;
 }
 export declare enum RoomState {
     LOBBY = "LOBBY",
