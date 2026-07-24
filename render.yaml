@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: fake-artist-api
+    env: node
+    buildCommand: npm install && npm run build:api
+    startCommand: npm run start:prod -w api
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: NODE_ENV
+        value: production
