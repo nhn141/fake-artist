@@ -70,14 +70,14 @@ export const ResultsView = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-900 text-white p-4 pt-12">
-      <div className={`bg-gray-800 p-8 rounded-3xl shadow-2xl w-full max-w-lg border relative overflow-hidden ${
+    <div className="flex flex-col items-center min-h-screen bg-stone-50 text-stone-800 p-4 pt-12">
+      <div className={`bg-white p-8 rounded-3xl shadow-xl shadow-stone-200/50 w-full max-w-lg border relative overflow-hidden ${
         faWon ? 'border-red-500/50' : 'border-green-500/50'
       }`}>
         
         {/* Decor */}
         <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full mix-blend-multiply filter blur-3xl opacity-20 ${
-          faWon ? 'bg-red-500' : 'bg-green-500'
+          faWon ? 'bg-rose-400' : 'bg-teal-400'
         }`}></div>
 
         <div className="text-center relative z-10 mb-8">
@@ -89,29 +89,29 @@ export const ResultsView = () => {
           }`}>
             {resultTitle}
           </h2>
-          <p className="text-gray-300 font-medium">{resultDesc}</p>
+          <p className="text-stone-600 font-medium">{resultDesc}</p>
         </div>
 
-        <div className="bg-gray-900/50 rounded-2xl p-6 mb-8 border border-gray-700">
+        <div className="bg-stone-50/50 rounded-2xl p-6 mb-8 border border-stone-200">
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Secret Word</p>
-              <p className="text-xl font-bold text-white">{roomState.secretWord}</p>
+              <p className="text-stone-400 text-xs font-bold uppercase tracking-wider mb-1">Secret Word</p>
+              <p className="text-xl font-bold text-stone-800">{roomState.secretWord}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Category</p>
-              <p className="text-xl font-bold text-white">{roomState.category}</p>
+              <p className="text-stone-400 text-xs font-bold uppercase tracking-wider mb-1">Category</p>
+              <p className="text-xl font-bold text-stone-800">{roomState.category}</p>
             </div>
           </div>
           
-          <div className="mt-6 pt-6 border-t border-gray-700 text-center">
-            <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">The Fake Artist was</p>
+          <div className="mt-6 pt-6 border-t border-stone-200 text-center">
+            <p className="text-stone-400 text-xs font-bold uppercase tracking-wider mb-2">The Fake Artist was</p>
             <div className="flex items-center justify-center gap-3">
               <div 
                 className="w-5 h-5 rounded-full shadow-inner"
                 style={{ backgroundColor: faPlayer?.color }}
               ></div>
-              <span className="text-2xl font-bold text-red-400">{faPlayer?.nickname}</span>
+              <span className="text-2xl font-bold text-rose-600">{faPlayer?.nickname}</span>
             </div>
           </div>
         </div>
@@ -119,12 +119,12 @@ export const ResultsView = () => {
         {isHost ? (
           <button
             onClick={handlePlayAgain}
-            className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-[0_0_20px_rgba(139,92,246,0.4)] transform hover:-translate-y-1"
+            className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-xl shadow-fuchsia-200 transform hover:-translate-y-1"
           >
             Play Again
           </button>
         ) : (
-          <div className="text-center text-gray-400 animate-pulse bg-gray-800/50 py-4 rounded-xl border border-gray-700/50">
+          <div className="text-center text-stone-500 animate-pulse bg-white/50 py-4 rounded-xl border border-stone-200/50">
             Waiting for host to restart...
           </div>
         )}

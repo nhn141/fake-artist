@@ -60,11 +60,11 @@ export const VotingView = () => {
   const hasVoted = !!votedId || !!roomState.votes[playerId!];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white max-w-2xl mx-auto p-4 pt-8">
-      <h2 className="text-3xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 mb-2">
+    <div className="flex flex-col min-h-screen bg-stone-50 text-stone-800 max-w-2xl mx-auto p-4 pt-8">
+      <h2 className="text-3xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-sky-400 mb-2">
         Time to Vote!
       </h2>
-      <p className="text-gray-400 text-center mb-6 font-medium">
+      <p className="text-stone-500 text-center mb-6 font-medium">
         Who do you think is the Fake Artist?
       </p>
 
@@ -73,7 +73,7 @@ export const VotingView = () => {
         <canvas ref={canvasRef} className="w-full h-full" />
       </div>
 
-      <div className="bg-gray-800 rounded-3xl p-6 shadow-2xl border border-gray-700 mb-8 flex-grow">
+      <div className="bg-white rounded-3xl p-6 shadow-xl shadow-stone-200/50 border border-stone-200 mb-8 flex-grow">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {roomState.players.map(p => {
             if (p.id === playerId) return null; // Can't vote for self
@@ -87,10 +87,10 @@ export const VotingView = () => {
                 onClick={() => handleVote(p.id)}
                 className={`flex items-center gap-3 p-4 rounded-xl transition-all ${
                   isVoted 
-                    ? 'bg-violet-600 border-2 border-violet-400 shadow-[0_0_15px_rgba(124,58,237,0.4)]' 
+                    ? 'bg-sky-400 text-white border-2 border-violet-400 shadow-lg shadow-sky-200' 
                     : hasVoted 
-                      ? 'bg-gray-700/50 opacity-50 cursor-not-allowed border border-gray-700' 
-                      : 'bg-gray-700 hover:bg-gray-600 border border-gray-600 hover:border-violet-500 hover:-translate-y-1'
+                      ? 'bg-stone-100 opacity-50 cursor-not-allowed border border-stone-200' 
+                      : 'bg-stone-100 hover:bg-stone-300 border border-stone-300 hover:border-violet-500 hover:-translate-y-1'
                 }`}
               >
                 <div 
@@ -105,7 +105,7 @@ export const VotingView = () => {
         </div>
 
         {hasVoted && (
-          <div className="mt-8 text-center text-gray-400 animate-pulse font-medium">
+          <div className="mt-8 text-center text-stone-500 animate-pulse font-medium">
             Waiting for other players to vote...
           </div>
         )}

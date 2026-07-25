@@ -215,44 +215,44 @@ export const CanvasView = () => {
   if (!roomState) return null;
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white max-w-2xl mx-auto">
+    <div className="flex flex-col h-screen bg-stone-50 text-stone-800 max-w-2xl mx-auto">
       {/* Header Info */}
-      <div className="flex justify-between items-center p-4 bg-gray-800 shadow-md z-10">
+      <div className="flex justify-between items-center p-4 bg-white shadow-md z-10">
         <div>
-          <div className="text-xs text-gray-400 font-bold tracking-wider uppercase mb-1">
+          <div className="text-xs text-stone-500 font-bold tracking-wider uppercase mb-1">
             Round {roomState.roundNumber} / 2
           </div>
-          <div className="text-xl font-bold text-pink-400">
-            Category: <span className="text-white">{roomState.category}</span>
+          <div className="text-xl font-bold text-rose-500">
+            Category: <span className="text-stone-800">{roomState.category}</span>
           </div>
         </div>
         
         {role?.isFakeArtist ? (
           <div className="text-right">
-            <div className="text-sm font-bold text-red-500 bg-red-500/20 px-3 py-1 rounded-lg border border-red-500/50">
+            <div className="text-sm font-bold text-rose-500 bg-rose-400/20 px-3 py-1 rounded-lg border border-red-500/50">
               YOU ARE THE FAKE ARTIST
             </div>
-            <div className="text-xs text-gray-400 mt-1">Blend in!</div>
+            <div className="text-xs text-stone-500 mt-1">Blend in!</div>
           </div>
         ) : (
           <div className="text-right">
-            <div className="text-sm font-bold text-green-400 bg-green-500/20 px-3 py-1 rounded-lg border border-green-500/50">
+            <div className="text-sm font-bold text-teal-600 bg-teal-400/20 px-3 py-1 rounded-lg border border-green-500/50">
               Word: {role?.secretWord}
             </div>
-            <div className="text-xs text-gray-400 mt-1">Find the Fake Artist!</div>
+            <div className="text-xs text-stone-500 mt-1">Find the Fake Artist!</div>
           </div>
         )}
       </div>
 
       {/* Turn Indicator */}
-      <div className={`p-3 text-center font-bold text-lg transition-colors ${isMyTurn ? 'bg-violet-600' : 'bg-gray-800 border-b border-gray-700'}`}>
+      <div className={`p-3 text-center font-bold text-lg transition-colors ${isMyTurn ? 'bg-sky-400 text-white' : 'bg-white border-b border-stone-200'}`}>
         {isMyTurn ? (
           <div className="flex items-center justify-center gap-2">
             <span className="animate-pulse">🎨 YOUR TURN!</span>
             <span className="bg-white/20 px-2 py-1 rounded-md text-sm">{timeLeft}s</span>
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-2 text-gray-300">
+          <div className="flex items-center justify-center gap-2 text-stone-600">
             <div 
               className="w-3 h-3 rounded-full" 
               style={{ backgroundColor: currentTurnPlayer?.color }}
@@ -284,25 +284,25 @@ export const CanvasView = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="p-4 bg-gray-800 pb-8 flex gap-4 h-24">
+      <div className="p-4 bg-white pb-8 flex gap-4 h-24">
         {isMyTurn && hasDrawnStroke && (
           <>
             <button
               onClick={handleUndo}
-              className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-colors"
+              className="flex-1 bg-stone-100 hover:bg-stone-300 text-stone-700 font-bold py-3 rounded-xl transition-colors"
             >
               Undo
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold py-3 rounded-xl shadow-[0_0_15px_rgba(52,211,153,0.4)]"
+              className="flex-1 bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-green-500 hover:to-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200"
             >
               Submit Stroke
             </button>
           </>
         )}
         {isMyTurn && !hasDrawnStroke && (
-          <div className="flex-1 flex items-center justify-center text-gray-400 text-sm font-medium">
+          <div className="flex-1 flex items-center justify-center text-stone-500 text-sm font-medium">
             Draw exactly 1 continuous stroke on the canvas above.
           </div>
         )}
