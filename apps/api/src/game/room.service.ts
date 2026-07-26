@@ -18,6 +18,7 @@ export interface InternalPlayer {
   nickname: string;
   color: string;
   socketId: string | null;
+  isReady: boolean;
 }
 
 export interface InternalRoom {
@@ -42,6 +43,7 @@ export interface InternalRoom {
   
   winner: 'FA' | 'ARTISTS' | null;
   fakeArtistCaught: boolean | null;
+  guessedWord: string | null;
 }
 
 const COLORS = [
@@ -102,6 +104,7 @@ export class RoomService {
       votes: {},
       winner: null,
       fakeArtistCaught: null,
+      guessedWord: null,
     });
     return code;
   }
@@ -149,6 +152,7 @@ export class RoomService {
       nickname: trimmedName,
       color,
       socketId,
+      isReady: false,
     };
 
     if (room.players.length === 0) {
@@ -182,6 +186,17 @@ export class RoomService {
     }
   }
 
+  setReady(code: string, playerId: string, isReady: boolean) {
+    const room = this.getRoom(code);
+    if (!room || room.state !== RoomState.LOBBY) return;
+    
+    const player = room.players.find(p => p.id === playerId);
+    if (player) {
+      player.isReady = isReady;
+      this.broadcastRoomState(room);
+    }
+  }
+
   startGame(code: string, playerId: string) {
     const room = this.getRoom(code);
     if (!room) return;
@@ -205,6 +220,7 @@ export class RoomService {
     room.votes = {};
     room.winner = null;
     room.fakeArtistCaught = null;
+    room.guessedWord = null;
     room.currentRound = 1;
     room.currentTurnIndex = 0;
 
@@ -326,6 +342,8 @@ export class RoomService {
 
     const isCorrect = guess.trim().toLowerCase() === room.secretWord?.toLowerCase();
     
+    room.guessedWord = guess;
+    
     if (isCorrect) {
       room.winner = 'FA';
     } else {
@@ -346,10 +364,12 @@ export class RoomService {
     room.category = null;
     room.fakeArtistId = null;
     room.turnOrder = [];
+    room.players.forEach(p => p.isReady = false);
     room.strokes = [];
     room.votes = {};
     room.winner = null;
     room.fakeArtistCaught = null;
+    room.guessedWord = null;
     room.turnTimer = null;
     
     this.broadcastRoomState(room);
@@ -375,12 +395,14 @@ export class RoomService {
       fakeArtistCaught: room.fakeArtistCaught,
       winner: room.winner,
       secretWord: isEnd ? room.secretWord : null, // Only reveal at END
+      guessedWord: isEnd ? room.guessedWord : null,
       players: room.players.map(p => ({
         id: p.id,
         nickname: p.nickname,
         color: p.color,
         isHost: p.id === room.hostId,
         isConnected: p.socketId !== null,
+        isReady: p.isReady,
         isFakeArtist: isEnd ? (p.id === room.fakeArtistId) : undefined // Only reveal FA at end in public state
       })),
     };

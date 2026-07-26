@@ -6,10 +6,13 @@ export declare enum ClientEvents {
     END_TURN = "END_TURN",// Optional if auto-ended
     VOTE_FAKE_ARTIST = "VOTE_FAKE_ARTIST",
     GUESS_WORD = "GUESS_WORD",
-    PLAY_AGAIN = "PLAY_AGAIN"
+    PLAY_AGAIN = "PLAY_AGAIN",
+    SEND_EMOJI = "SEND_EMOJI",
+    SET_READY = "SET_READY"
 }
 export declare enum ServerEvents {
     ROOM_STATE_UPDATE = "ROOM_STATE_UPDATE",
     ROLE_ASSIGNMENT = "ROLE_ASSIGNMENT",
+    RECEIVE_EMOJI = "RECEIVE_EMOJI",
     ERROR = "ERROR"
 }

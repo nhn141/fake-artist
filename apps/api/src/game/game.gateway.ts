@@ -143,4 +143,29 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit(ServerEvents.ERROR, { message: error.message });
     }
   }
+
+  @SubscribeMessage(ClientEvents.SEND_EMOJI)
+  handleSendEmoji(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { roomCode: string; playerId: string; emoji: string },
+  ) {
+    try {
+      this.server.to(payload.roomCode).emit(ServerEvents.RECEIVE_EMOJI, {
+        playerId: payload.playerId,
+        emoji: payload.emoji,
+      });
+    } catch (error: any) {}
+  }
+
+  @SubscribeMessage(ClientEvents.SET_READY)
+  handleSetReady(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { roomCode: string; playerId: string; isReady: boolean },
+  ) {
+    try {
+      this.roomService.setReady(payload.roomCode, payload.playerId, payload.isReady);
+    } catch (error: any) {
+      client.emit(ServerEvents.ERROR, { message: error.message });
+    }
+  }
 }

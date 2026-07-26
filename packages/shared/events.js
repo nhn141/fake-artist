@@ -11,10 +11,13 @@ var ClientEvents;
     ClientEvents["VOTE_FAKE_ARTIST"] = "VOTE_FAKE_ARTIST";
     ClientEvents["GUESS_WORD"] = "GUESS_WORD";
     ClientEvents["PLAY_AGAIN"] = "PLAY_AGAIN";
+    ClientEvents["SEND_EMOJI"] = "SEND_EMOJI";
+    ClientEvents["SET_READY"] = "SET_READY";
 })(ClientEvents || (exports.ClientEvents = ClientEvents = {}));
 var ServerEvents;
 (function (ServerEvents) {
     ServerEvents["ROOM_STATE_UPDATE"] = "ROOM_STATE_UPDATE";
     ServerEvents["ROLE_ASSIGNMENT"] = "ROLE_ASSIGNMENT";
+    ServerEvents["RECEIVE_EMOJI"] = "RECEIVE_EMOJI";
     ServerEvents["ERROR"] = "ERROR";
 })(ServerEvents || (exports.ServerEvents = ServerEvents = {}));

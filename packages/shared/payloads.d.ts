@@ -22,6 +22,13 @@ export interface VotePayload {
 export interface GuessWordPayload {
     guess: string;
 }
+export interface EmojiPayload {
+    emoji: string;
+    playerId: string;
+}
+export interface SetReadyPayload {
+    isReady: boolean;
+}
 export interface PublicRoomState {
     roomCode: string;
     state: RoomState;
@@ -36,6 +43,7 @@ export interface PublicRoomState {
     fakeArtistCaught: boolean | null;
     winner: 'FA' | 'ARTISTS' | null;
     secretWord: string | null;
+    guessedWord: string | null;
 }
 export interface RoleAssignmentPayload {
     isFakeArtist: boolean;

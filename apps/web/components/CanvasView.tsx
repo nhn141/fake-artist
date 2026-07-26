@@ -2,9 +2,11 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { StrokePoint } from 'shared';
 import { sounds } from '../lib/sounds';
+import { PlayerAvatar } from './PlayerAvatar';
+import { EmojiFloating } from './EmojiFloating';
 
 export const CanvasView = () => {
-  const { roomState, playerId, drawStroke, role } = useGame();
+  const { roomState, playerId, drawStroke, role, emojis, sendEmoji } = useGame();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -18,13 +20,13 @@ export const CanvasView = () => {
   const isMyTurn = roomState?.currentTurnPlayerId === playerId;
   const myPlayer = roomState?.players.find(p => p.id === playerId);
   const myColor = myPlayer?.color || '#fff';
-  
+
   // Keep refs updated for interval closures
   useEffect(() => {
     hasDrawnStrokeRef.current = hasDrawnStroke;
     myColorRef.current = myColor;
   }, [hasDrawnStroke, myColor]);
-  
+
   const currentTurnPlayer = roomState?.players.find(p => p.id === roomState?.currentTurnPlayerId);
 
   // Redraw canvas whenever room strokes change
@@ -42,12 +44,12 @@ export const CanvasView = () => {
         drawAll();
       }
     };
-    
+
     // Initial size
     if (canvas.width === 0) {
       resizeCanvas();
     }
-    
+
     window.addEventListener('resize', resizeCanvas);
 
     const drawAll = () => {
@@ -83,7 +85,7 @@ export const CanvasView = () => {
     };
 
     drawAll();
-    
+
     return () => window.removeEventListener('resize', resizeCanvas);
   }, [roomState?.strokes, myColor, hasDrawnStroke]); // hasDrawnStroke included to re-trigger on undo/stop
 
@@ -101,7 +103,13 @@ export const CanvasView = () => {
     const interval = setInterval(() => {
       const elapsed = Date.now() - roomState.turnStartTime!;
       const remaining = Math.max(0, 15 - Math.floor(elapsed / 1000));
-      setTimeLeft(remaining);
+
+      setTimeLeft(prev => {
+        if (remaining <= 5 && remaining > 0 && remaining !== prev) {
+          sounds.playTick();
+        }
+        return remaining;
+      });
 
       // Auto submit slightly before server timeout or exactly at 0 if we have a stroke
       if (remaining <= 0 && isMyTurn && currentStrokeRef.current.length > 0) {
@@ -127,7 +135,7 @@ export const CanvasView = () => {
   const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
-    
+
     const rect = canvas.getBoundingClientRect();
     let clientX, clientY;
 
@@ -147,11 +155,12 @@ export const CanvasView = () => {
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isMyTurn || hasDrawnStroke) return;
-    
+
     setIsDrawing(true);
+    sounds.startScratch();
     const pos = getCoordinates(e);
     currentStrokeRef.current = [pos];
-    
+
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (ctx && canvas) {
@@ -169,13 +178,13 @@ export const CanvasView = () => {
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrawing || !isMyTurn || hasDrawnStroke) return;
-    
+
     const pos = getCoordinates(e);
     const lastPos = currentStrokeRef.current[currentStrokeRef.current.length - 1];
     if (!lastPos) return;
-    
+
     currentStrokeRef.current.push(pos);
-    
+
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (ctx && canvas) {
@@ -192,6 +201,7 @@ export const CanvasView = () => {
   };
 
   const stopDrawing = () => {
+    sounds.stopScratch();
     if (isDrawing && currentStrokeRef.current.length > 0) {
       setIsDrawing(false);
       setHasDrawnStroke(true);
@@ -220,44 +230,58 @@ export const CanvasView = () => {
       <div className="flex justify-between items-center p-4 bg-white shadow-md z-10">
         <div>
           <div className="text-xs text-stone-500 font-bold tracking-wider uppercase mb-1">
-            Round {roomState.roundNumber} / 2
+            Vòng {roomState.roundNumber} / 2
           </div>
           <div className="text-xl font-bold text-rose-500">
-            Category: <span className="text-stone-800">{roomState.category}</span>
+            Chủ đề: <span className="text-stone-800">{roomState.category}</span>
           </div>
         </div>
-        
+
         {role?.isFakeArtist ? (
           <div className="text-right">
             <div className="text-sm font-bold text-rose-500 bg-rose-400/20 px-3 py-1 rounded-lg border border-red-500/50">
-              YOU ARE THE FAKE ARTIST
+              BẠN LÀ FAKE ARTIST
             </div>
-            <div className="text-xs text-stone-500 mt-1">Blend in!</div>
+            <div className="text-xs text-stone-500 mt-1">Hãy giả vờ là mình biết từ khóa!</div>
           </div>
         ) : (
           <div className="text-right">
             <div className="text-sm font-bold text-teal-600 bg-teal-400/20 px-3 py-1 rounded-lg border border-green-500/50">
-              Word: {role?.secretWord}
+              Từ khóa: {role?.secretWord}
             </div>
-            <div className="text-xs text-stone-500 mt-1">Find the Fake Artist!</div>
+            <div className="text-xs text-stone-500 mt-1">Tìm ra Fake Artist!</div>
           </div>
         )}
       </div>
 
+      {/* Color Legend & Players */}
+      <div className="px-4 py-2 bg-stone-100 flex gap-3 overflow-x-auto border-b border-stone-200 hide-scrollbar">
+        {roomState.players.map(p => (
+          <div key={p.id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${p.id === roomState.currentTurnPlayerId ? 'bg-white shadow-sm border border-stone-300 transform scale-105' : 'opacity-60 bg-stone-200'}`}>
+            <PlayerAvatar name={p.nickname} size={16} playerColor={p.color} className="border shadow-sm" style={{ borderColor: p.color }} />
+            <span className="text-stone-700 ml-1">{p.nickname}</span>
+            <div className="w-3 h-3 rounded-full border border-white shadow-sm ml-1" style={{ backgroundColor: p.color }}></div>
+          </div>
+        ))}
+      </div>
+
       {/* Turn Indicator */}
-      <div className={`p-3 text-center font-bold text-lg transition-colors ${isMyTurn ? 'bg-sky-400 text-white' : 'bg-white border-b border-stone-200'}`}>
+      <div className={`p-3 text-center font-bold text-lg transition-colors ${isMyTurn ? 'bg-sky-400 text-white shadow-inner' : 'bg-white border-b border-stone-200'}`}>
         {isMyTurn ? (
           <div className="flex items-center justify-center gap-2">
-            <span className="animate-pulse">🎨 YOUR TURN!</span>
+            <span className="animate-pulse">🎨 ĐẾN LƯỢT BẠN!</span>
             <span className="bg-white/20 px-2 py-1 rounded-md text-sm">{timeLeft}s</span>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2 text-stone-600">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: currentTurnPlayer?.color }}
-            ></div>
-            {currentTurnPlayer?.nickname} is drawing...
+            <PlayerAvatar 
+              name={currentTurnPlayer?.nickname || ''} 
+              size={20} 
+              playerColor={currentTurnPlayer?.color} 
+              className="border-2" 
+              style={{ borderColor: currentTurnPlayer?.color }} 
+            />
+            {currentTurnPlayer?.nickname} đang vẽ...
           </div>
         )}
       </div>
@@ -276,11 +300,16 @@ export const CanvasView = () => {
           onTouchMove={draw}
           onTouchEnd={stopDrawing}
         />
-        
+
         {/* Overlay if not turn */}
         {!isMyTurn && (
           <div className="absolute inset-0 bg-transparent pointer-events-none"></div>
         )}
+
+        {/* Floating Emojis */}
+        {emojis.map(e => (
+          <EmojiFloating key={e.id} emoji={e.emoji} xPos={e.x} />
+        ))}
       </div>
 
       {/* Action Buttons */}
@@ -291,19 +320,35 @@ export const CanvasView = () => {
               onClick={handleUndo}
               className="flex-1 bg-stone-100 hover:bg-stone-300 text-stone-700 font-bold py-3 rounded-xl transition-colors"
             >
-              Undo
+              Hoàn Tác (Undo)
             </button>
             <button
               onClick={handleSubmit}
               className="flex-1 bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-green-500 hover:to-emerald-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-200"
             >
-              Submit Stroke
+              Hoàn tất
             </button>
           </>
         )}
         {isMyTurn && !hasDrawnStroke && (
           <div className="flex-1 flex items-center justify-center text-stone-500 text-sm font-medium">
-            Draw exactly 1 continuous stroke on the canvas above.
+            Hãy vẽ đúng 1 nét liên tục trên khung vẽ.
+          </div>
+        )}
+        {!isMyTurn && (
+          <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
+            <span className="text-stone-400 font-bold text-xs sm:text-sm uppercase tracking-wider">Thả Cảm Xúc</span>
+            <div className="flex gap-3 sm:gap-4">
+              {['😂', '🤔', '🎨', '😱', '👏', '👎'].map(e => (
+                <button
+                  key={e}
+                  onClick={() => { sounds.playClick(); sendEmoji(e); }}
+                  className="text-2xl sm:text-3xl hover:-translate-y-2 transition-all active:scale-95 bg-stone-100 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full shadow-sm border border-stone-200 hover:bg-white hover:shadow-md"
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

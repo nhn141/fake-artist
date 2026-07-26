@@ -7,8 +7,16 @@ import {
   RoleAssignmentPayload,
   ClientEvents,
   ServerEvents,
-  DrawStrokePayload
+  DrawStrokePayload,
+  EmojiPayload
 } from 'shared';
+
+export interface FloatingEmoji {
+  id: number;
+  emoji: string;
+  playerId: string;
+  x: number;
+}
 
 interface GameContextType {
   socket: Socket | null;
@@ -17,6 +25,7 @@ interface GameContextType {
   playerToken: string | null;
   role: RoleAssignmentPayload | null;
   error: string | null;
+  emojis: FloatingEmoji[];
   
   createRoom: () => void;
   joinRoom: (code: string, nickname: string) => void;
@@ -25,6 +34,8 @@ interface GameContextType {
   vote: (votedId: string) => void;
   guessWord: (guess: string) => void;
   playAgain: () => void;
+  sendEmoji: (emoji: string) => void;
+  setReady: (isReady: boolean) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -36,6 +47,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [playerToken, setPlayerToken] = useState<string | null>(null);
   const [role, setRole] = useState<RoleAssignmentPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [emojis, setEmojis] = useState<FloatingEmoji[]>([]);
 
   useEffect(() => {
     // Generate token if not exists
@@ -46,8 +58,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     }
     setPlayerToken(token);
 
-    // Reconnect logic will just use the token when joining
-    // Connection happens instantly but we only join a room when user acts
     const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001');
     setSocket(newSocket);
 
@@ -64,6 +74,19 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       setError(payload.message);
     });
 
+    newSocket.on(ServerEvents.RECEIVE_EMOJI, (payload: EmojiPayload) => {
+      const id = Date.now() + Math.random();
+      const x = 10 + Math.random() * 80; // random horizontal pos (10% to 90%)
+      const newEmoji = { id, emoji: payload.emoji, playerId: payload.playerId, x };
+      
+      setEmojis(prev => [...prev, newEmoji]);
+      
+      // Auto remove after 2.5s (animation duration)
+      setTimeout(() => {
+        setEmojis(prev => prev.filter(e => e.id !== id));
+      }, 2500);
+    });
+
     return () => {
       newSocket.disconnect();
     };
@@ -72,7 +95,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const createRoom = () => {
     if (!socket) return;
     socket.emit('CREATE_ROOM', {}, (res: { roomCode: string }) => {
-      // Auto join after creating
       const nickname = sessionStorage.getItem('fake_artist_nickname') || 'Host';
       joinRoom(res.roomCode, nickname);
     });
@@ -120,10 +142,20 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     socket.emit(ClientEvents.PLAY_AGAIN, { roomCode: roomState.roomCode, playerId });
   };
 
+  const setReady = (isReady: boolean) => {
+    if (!socket || !roomState || !playerId) return;
+    socket.emit(ClientEvents.SET_READY, { roomCode: roomState.roomCode, playerId, isReady });
+  };
+
+  const sendEmoji = (emoji: string) => {
+    if (!socket || !roomState || !playerId) return;
+    socket.emit(ClientEvents.SEND_EMOJI, { roomCode: roomState.roomCode, playerId, emoji });
+  };
+
   return (
     <GameContext.Provider value={{
-      socket, roomState, playerId, playerToken, role, error,
-      createRoom, joinRoom, startGame, drawStroke, vote, guessWord, playAgain
+      socket, roomState, playerId, playerToken, role, error, emojis,
+      createRoom, joinRoom, startGame, drawStroke, vote, guessWord, playAgain, sendEmoji, setReady
     }}>
       {children}
     </GameContext.Provider>

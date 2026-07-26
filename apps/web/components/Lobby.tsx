@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { RoomState } from 'shared';
 import { sounds } from '../lib/sounds';
+import { PlayerAvatar } from './PlayerAvatar';
 
 export const Lobby = () => {
-  const { roomState, playerId, createRoom, joinRoom, startGame, error } = useGame();
+  const { roomState, playerId, createRoom, joinRoom, startGame, setReady, error } = useGame();
   const [roomCode, setRoomCode] = useState('');
   const [nickname, setNickname] = useState('');
   const [showRules, setShowRules] = useState(false);
@@ -13,6 +14,15 @@ export const Lobby = () => {
     const savedName = sessionStorage.getItem('fake_artist_nickname');
     if (savedName) setNickname(savedName);
   }, []);
+
+  useEffect(() => {
+    if (roomState?.state === RoomState.LOBBY) {
+      sounds.startBGM('lobby');
+    } else {
+      sounds.stopBGM();
+    }
+    return () => sounds.stopBGM();
+  }, [roomState?.state]);
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +121,7 @@ export const Lobby = () => {
               <div className="mt-2 p-4 bg-white/80 border border-stone-300 rounded-xl text-sm text-stone-600 space-y-3">
                 <p><strong>🎨 A Fake Artist Goes to New York</strong> là game dành cho 4-10 người.</p>
                 <ul className="list-disc pl-5 space-y-1 text-stone-500">
-                  <li>Mọi người đều nhận được một chủ đề và một <strong>Từ Khóa Bí Mật</strong> thuộc chủ đề đó (VD: chủ đề động vật, từ khóa con chó), NGOẠI TRỪ 1 người bị chọn ngẫu nhiên làm <strong>Fake Artist</strong>, người đó chỉ biết Chủ Đề, không biết từ khóa.</li>
+                  <li>Mọi người đều nhận được một chủ đề và một <strong>Từ Khóa Bí Mật</strong> thuộc chủ đề đó (VD: chủ đề động vật, từ khóa con chó), NGOẠI TRỪ 1 người bị chọn ngẫu nhiên làm <strong>Fake Artist</strong>, người đó chỉ biết chủ đề, không biết từ khóa.</li>
                   <li>Lần lượt từng người sẽ vẽ <strong>MỘT NÉT DUY NHẤT</strong> lên bức tranh chung (phân biệt từng người qua màu sắc). (Vẽ 2 vòng).</li>
                   <li>Mọi người phải vẽ sao cho người khác biết mình biết từ khóa, nhưng không được vẽ quá rõ để lộ từ khóa cho <strong>Fake Artist</strong> đoán được.</li>
                   <li><strong>Fake Artist</strong> phải vẽ "hùa" theo để giả vờ như mình cũng biết từ khóa.</li>
@@ -139,6 +149,9 @@ export const Lobby = () => {
 
   if (roomState && roomState.state === RoomState.LOBBY) {
     const isHost = roomState.hostId === playerId;
+    const myPlayer = roomState.players.find(p => p.id === playerId);
+    const isReady = myPlayer?.isReady || false;
+    const allOthersReady = roomState.players.filter(p => !p.isHost).every(p => p.isReady);
 
     return (
       <div className="flex flex-col items-center min-h-screen bg-stone-50 text-stone-800 p-4 pt-12">
@@ -161,17 +174,27 @@ export const Lobby = () => {
                 {roomState.players.map(p => (
                   <div key={p.id} className="flex items-center justify-between bg-white p-3 rounded-xl border border-stone-200">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-4 h-4 rounded-full shadow-inner"
-                        style={{ backgroundColor: p.color }}
-                      ></div>
+                      <PlayerAvatar
+                        name={p.nickname}
+                        size={36}
+                        playerColor={p.color}
+                        className="border-[3px]"
+                        style={{ borderColor: p.color }}
+                      />
                       <span className={`font-semibold ${p.id === playerId ? 'text-stone-800' : 'text-stone-600'}`}>
                         {p.nickname} {p.id === playerId && '(You)'}
                       </span>
                     </div>
-                    {p.isHost && (
-                      <span className="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-md font-bold border border-sky-200">HOST</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {p.isHost && (
+                        <span className="text-xs bg-sky-100 text-sky-700 px-2 py-1 rounded-md font-bold border border-sky-200">HOST</span>
+                      )}
+                      {!p.isHost && (
+                        <span className={`text-xs px-2 py-1 rounded-md font-bold border ${p.isReady ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-stone-100 text-stone-500 border-stone-200'}`}>
+                          {p.isReady ? 'READY' : 'WAITING'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -180,15 +203,22 @@ export const Lobby = () => {
             {isHost ? (
               <button
                 onClick={handleStart}
-                disabled={roomState.players.length < 4}
+                disabled={roomState.players.length < 4 || !allOthersReady}
                 className="w-full bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-500 hover:to-emerald-500 disabled:from-stone-300 disabled:to-stone-400 disabled:text-stone-500 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-xl shadow-emerald-200 transform hover:-translate-y-1 disabled:hover:translate-y-0"
               >
-                {roomState.players.length < 4 ? 'Waiting for more players (min 4)...' : 'Start Game'}
+                {roomState.players.length < 4
+                  ? 'Chờ đủ người chơi (tối thiểu 4)...'
+                  : !allOthersReady
+                    ? 'Chờ tất cả người chơi sẵn sàng...'
+                    : 'Bắt đầu'}
               </button>
             ) : (
-              <div className="text-center text-stone-500 animate-pulse bg-white/50 py-4 rounded-xl border border-stone-200/50">
-                Waiting for host to start...
-              </div>
+              <button
+                onClick={() => { sounds.playClick(); setReady(!isReady); }}
+                className={`w-full font-bold py-4 px-4 rounded-xl transition-all shadow-xl transform hover:-translate-y-1 ${isReady ? 'bg-stone-200 hover:bg-stone-300 text-stone-700 shadow-stone-200' : 'bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-500 hover:to-emerald-500 text-white shadow-emerald-200'}`}
+              >
+                {isReady ? 'Hủy' : 'Sẵn sàng'}
+              </button>
             )}
           </div>
         </div>

@@ -45,4 +45,14 @@ export declare class GameGateway implements OnGatewayConnection, OnGatewayDiscon
         roomCode: string;
         playerId: string;
     }): void;
+    handleSendEmoji(client: Socket, payload: {
+        roomCode: string;
+        playerId: string;
+        emoji: string;
+    }): void;
+    handleSetReady(client: Socket, payload: {
+        roomCode: string;
+        playerId: string;
+        isReady: boolean;
+    }): void;
 }

@@ -29,6 +29,15 @@ export interface GuessWordPayload {
   guess: string;
 }
 
+export interface EmojiPayload {
+  emoji: string;
+  playerId: string;
+}
+
+export interface SetReadyPayload {
+  isReady: boolean;
+}
+
 // State broadcast to all players
 export interface PublicRoomState {
   roomCode: string;
@@ -44,6 +53,7 @@ export interface PublicRoomState {
   fakeArtistCaught: boolean | null;
   winner: 'FA' | 'ARTISTS' | null;
   secretWord: string | null; // Only revealed at END
+  guessedWord: string | null; // The word the FA guessed (if any)
 }
 
 // Sent privately to each socket

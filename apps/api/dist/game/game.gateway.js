@@ -100,6 +100,23 @@ let GameGateway = GameGateway_1 = class GameGateway {
             client.emit(shared_1.ServerEvents.ERROR, { message: error.message });
         }
     }
+    handleSendEmoji(client, payload) {
+        try {
+            this.server.to(payload.roomCode).emit(shared_1.ServerEvents.RECEIVE_EMOJI, {
+                playerId: payload.playerId,
+                emoji: payload.emoji,
+            });
+        }
+        catch (error) { }
+    }
+    handleSetReady(client, payload) {
+        try {
+            this.roomService.setReady(payload.roomCode, payload.playerId, payload.isReady);
+        }
+        catch (error) {
+            client.emit(shared_1.ServerEvents.ERROR, { message: error.message });
+        }
+    }
 };
 exports.GameGateway = GameGateway;
 __decorate([
@@ -161,6 +178,22 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", void 0)
 ], GameGateway.prototype, "handlePlayAgain", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)(shared_1.ClientEvents.SEND_EMOJI),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleSendEmoji", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)(shared_1.ClientEvents.SET_READY),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __param(1, (0, websockets_1.MessageBody)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleSetReady", null);
 exports.GameGateway = GameGateway = GameGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

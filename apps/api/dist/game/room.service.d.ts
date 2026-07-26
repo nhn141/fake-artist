@@ -6,6 +6,7 @@ export interface InternalPlayer {
     nickname: string;
     color: string;
     socketId: string | null;
+    isReady: boolean;
 }
 export interface InternalRoom {
     code: string;
@@ -24,6 +25,7 @@ export interface InternalRoom {
     votes: Record<string, string>;
     winner: 'FA' | 'ARTISTS' | null;
     fakeArtistCaught: boolean | null;
+    guessedWord: string | null;
 }
 export declare class RoomService {
     private readonly logger;
@@ -39,6 +41,7 @@ export declare class RoomService {
         isNew: boolean;
     };
     leaveRoom(socketId: string): void;
+    setReady(code: string, playerId: string, isReady: boolean): void;
     startGame(code: string, playerId: string): void;
     private startTurn;
     advanceTurn(code: string): void;

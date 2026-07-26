@@ -63,6 +63,7 @@ let RoomService = RoomService_1 = class RoomService {
             votes: {},
             winner: null,
             fakeArtistCaught: null,
+            guessedWord: null,
         });
         return code;
     }
@@ -99,6 +100,7 @@ let RoomService = RoomService_1 = class RoomService {
             nickname: trimmedName,
             color,
             socketId,
+            isReady: false,
         };
         if (room.players.length === 0) {
             room.hostId = playerId;
@@ -127,6 +129,16 @@ let RoomService = RoomService_1 = class RoomService {
             }
         }
     }
+    setReady(code, playerId, isReady) {
+        const room = this.getRoom(code);
+        if (!room || room.state !== shared_1.RoomState.LOBBY)
+            return;
+        const player = room.players.find(p => p.id === playerId);
+        if (player) {
+            player.isReady = isReady;
+            this.broadcastRoomState(room);
+        }
+    }
     startGame(code, playerId) {
         const room = this.getRoom(code);
         if (!room)
@@ -144,6 +156,7 @@ let RoomService = RoomService_1 = class RoomService {
         room.votes = {};
         room.winner = null;
         room.fakeArtistCaught = null;
+        room.guessedWord = null;
         room.currentRound = 1;
         room.currentTurnIndex = 0;
         for (const p of room.players) {
@@ -244,6 +257,7 @@ let RoomService = RoomService_1 = class RoomService {
         if (room.fakeArtistId !== playerId)
             throw new Error('Only FA can guess');
         const isCorrect = guess.trim().toLowerCase() === room.secretWord?.toLowerCase();
+        room.guessedWord = guess;
         if (isCorrect) {
             room.winner = 'FA';
         }
@@ -264,10 +278,12 @@ let RoomService = RoomService_1 = class RoomService {
         room.category = null;
         room.fakeArtistId = null;
         room.turnOrder = [];
+        room.players.forEach(p => p.isReady = false);
         room.strokes = [];
         room.votes = {};
         room.winner = null;
         room.fakeArtistCaught = null;
+        room.guessedWord = null;
         room.turnTimer = null;
         this.broadcastRoomState(room);
     }
@@ -289,12 +305,14 @@ let RoomService = RoomService_1 = class RoomService {
             fakeArtistCaught: room.fakeArtistCaught,
             winner: room.winner,
             secretWord: isEnd ? room.secretWord : null,
+            guessedWord: isEnd ? room.guessedWord : null,
             players: room.players.map(p => ({
                 id: p.id,
                 nickname: p.nickname,
                 color: p.color,
                 isHost: p.id === room.hostId,
                 isConnected: p.socketId !== null,
+                isReady: p.isReady,
                 isFakeArtist: isEnd ? (p.id === room.fakeArtistId) : undefined
             })),
         };
