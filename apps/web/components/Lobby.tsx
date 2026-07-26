@@ -56,20 +56,20 @@ export const Lobby = () => {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-stone-500 mb-2">Your Nickname</label>
+              <label className="block text-sm font-medium text-stone-500 mb-2">Biệt danh</label>
               <input
                 type="text"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 className="w-full bg-stone-100 text-stone-800 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
-                placeholder="Enter nickname..."
+                placeholder="Nhập biệt danh của bạn..."
                 maxLength={15}
               />
             </div>
 
             <div className="relative flex py-2 items-center">
               <div className="flex-grow border-t border-stone-300"></div>
-              <span className="flex-shrink-0 mx-4 text-stone-400 text-sm font-medium">JOIN ROOM</span>
+              <span className="flex-shrink-0 mx-4 text-stone-400 text-sm font-medium">VÀO PHÒNG CHƠI</span>
               <div className="flex-grow border-t border-stone-300"></div>
             </div>
 
@@ -79,7 +79,7 @@ export const Lobby = () => {
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                 className="w-full bg-stone-100 text-stone-800 border border-stone-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all font-mono uppercase tracking-wider"
-                placeholder="ROOM CODE"
+                placeholder="MÃ PHÒNG"
                 maxLength={4}
               />
               <button
@@ -87,13 +87,13 @@ export const Lobby = () => {
                 disabled={!roomCode || !nickname}
                 className="bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-sky-200"
               >
-                Join
+                Vào
               </button>
             </form>
 
             <div className="relative flex py-2 items-center">
               <div className="flex-grow border-t border-stone-300"></div>
-              <span className="flex-shrink-0 mx-4 text-stone-400 text-sm font-medium">OR</span>
+              <span className="flex-shrink-0 mx-4 text-stone-400 text-sm font-medium">HOẶC</span>
               <div className="flex-grow border-t border-stone-300"></div>
             </div>
 
@@ -101,7 +101,7 @@ export const Lobby = () => {
               onClick={handleCreate}
               className="w-full bg-gradient-to-r from-rose-400 to-sky-400 hover:from-pink-600 hover:to-violet-600 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-xl shadow-rose-200 transform hover:-translate-y-1"
             >
-              Create New Room
+              Tạo phòng chơi mới
             </button>
           </div>
 
@@ -161,7 +161,7 @@ export const Lobby = () => {
           <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
 
           <div className="relative z-10">
-            <h2 className="text-xl text-stone-500 font-medium text-center mb-2">Room Code</h2>
+            <h2 className="text-xl text-stone-500 font-medium text-center mb-2">MÃ PHÒNG</h2>
             <div className="text-6xl font-black text-center tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-sky-400 mb-8 font-mono">
               {roomState.roomCode}
             </div>
@@ -182,7 +182,7 @@ export const Lobby = () => {
                         style={{ borderColor: p.color }}
                       />
                       <span className={`font-semibold ${p.id === playerId ? 'text-stone-800' : 'text-stone-600'}`}>
-                        {p.nickname} {p.id === playerId && '(You)'}
+                        {p.nickname} {p.id === playerId && '(Bạn)'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
